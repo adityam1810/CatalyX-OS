@@ -1,4 +1,4 @@
-# CatalyX OS
+# CatalyX OS [CODENAME - MODI]
 
 > A modular Debian-based Linux distribution focused on Cloud, Security, DevOps, and system administration.
 
