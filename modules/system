@@ -1,0 +1,65 @@
+#!/bin/bash
+
+SUBCOMMAND="$1"
+
+case "$SUBCOMMAND" in
+
+    ""|info)
+        echo
+        echo "================================"
+        echo "        CatalyX SYSTEM"
+        echo "================================"
+        echo
+        echo "Hostname     : $(hostname)"
+        echo "Kernel       : $(uname -r)"
+        echo "Architecture : $(uname -m)"
+        echo "Uptime       : $(uptime -p)"
+
+        source /etc/os-release
+        echo "OS           : $PRETTY_NAME"
+
+        echo
+        ;;
+
+    cpu)
+        echo "=== CPU INFORMATION ==="
+        lscpu | grep -E 'Architecture|CPU\(s\)|Model name|Thread|Core|Socket'
+        ;;
+
+    memory)
+        echo "=== MEMORY INFORMATION ==="
+        free -h
+        ;;
+
+    disk)
+        echo "=== DISK INFORMATION ==="
+        lsblk
+        echo
+        df -h
+        ;;
+
+    processes)
+        echo "=== TOP PROCESSES ==="
+        ps aux --sort=-%cpu | head -11
+        ;;
+
+    services)
+        echo "=== ACTIVE SERVICES ==="
+        systemctl --type=service --state=running --no-pager
+        ;;
+
+    *)
+        echo "Unknown system command: $SUBCOMMAND"
+        echo
+        echo "Usage:"
+        echo "  system"
+        echo "  system info"
+        echo "  system cpu"
+        echo "  system memory"
+        echo "  system disk"
+        echo "  system processes"
+        echo "  system services"
+        exit 1
+        ;;
+
+esac

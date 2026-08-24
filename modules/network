@@ -1,0 +1,65 @@
+#!/bin/bash
+
+CONFIG="/etc/distro/config"
+
+if [ -f "$CONFIG" ]; then
+    source "$CONFIG"
+fi
+
+case "$1" in
+
+    info|"")
+        echo "================================"
+        echo "        $OS_NAME NETWORK"
+        echo "================================"
+        echo
+
+        echo "Interfaces:"
+        ip -br addr
+
+        echo
+        echo "Routes:"
+        ip route
+        ;;
+
+    interfaces)
+        echo "=== NETWORK INTERFACES ==="
+        ip -br addr
+        ;;
+
+    routes)
+        echo "=== NETWORK ROUTES ==="
+        ip route
+        ;;
+
+    dns)
+        echo "=== DNS CONFIGURATION ==="
+
+        if [ -f /etc/resolv.conf ]; then
+            cat /etc/resolv.conf
+        else
+            echo "DNS configuration not found."
+        fi
+        ;;
+
+    connectivity)
+        echo "=== CONNECTIVITY TEST ==="
+
+        if ping -c 1 -W 2 8.8.8.8 >/dev/null 2>&1; then
+            echo "Internet : Connected"
+        else
+            echo "Internet : Offline"
+        fi
+
+        if ping -c 1 -W 2 google.com >/dev/null 2>&1; then
+            echo "DNS      : Working"
+        else
+            echo "DNS      : Not working"
+        fi
+        ;;
+
+    *)
+        echo "Usage: $CLI_NAME network [info|interfaces|routes|dns|connectivity]"
+        ;;
+
+esac

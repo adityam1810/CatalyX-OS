@@ -1,0 +1,237 @@
+#!/bin/bash
+
+CONFIG="/etc/distro/config"
+
+if [ -f "$CONFIG" ]; then
+    source "$CONFIG"
+fi
+
+show_header() {
+    echo
+    echo "================================"
+    echo "        $OS_NAME CLOUD"
+    echo "================================"
+    echo
+}
+
+cloud_status() {
+    show_header
+
+    echo "Environment:"
+    echo
+
+    if [ -f /sys/class/dmi/id/product_name ]; then
+        PRODUCT=$(cat /sys/class/dmi/id/product_name 2>/dev/null)
+
+        case "$PRODUCT" in
+            *VirtualBox*)
+                echo "  Provider : VirtualBox"
+                echo "  Type     : Virtual Machine"
+                ;;
+            *)
+                echo "  Provider : Unknown"
+                echo "  Type     : $PRODUCT"
+                ;;
+        esac
+    else
+        echo "  Provider : Unknown"
+    fi
+
+    echo
+    echo "Cloud Tools:"
+    echo
+
+    command -v aws >/dev/null 2>&1 \
+        && echo "  AWS CLI    : Installed" \
+        || echo "  AWS CLI    : Not installed"
+
+    command -v docker >/dev/null 2>&1 \
+        && echo "  Docker     : Installed" \
+        || echo "  Docker     : Not installed"
+
+    command -v kubectl >/dev/null 2>&1 \
+        && echo "  kubectl    : Installed" \
+        || echo "  kubectl    : Not installed"
+
+    echo
+    echo "Connectivity:"
+    echo
+
+    if ping -c 1 -W 2 8.8.8.8 >/dev/null 2>&1; then
+        echo "  Internet   : Connected"
+    else
+        echo "  Internet   : Offline"
+    fi
+
+    if getent hosts amazon.com >/dev/null 2>&1; then
+        echo "  DNS        : Working"
+    else
+        echo "  DNS        : Failed"
+    fi
+
+    echo
+}
+
+cloud_tools() {
+    show_header
+
+    echo "Cloud Tool Availability:"
+    echo
+
+    command -v aws >/dev/null 2>&1 \
+        && echo "  [OK] AWS CLI" \
+        || echo "  [--] AWS CLI"
+
+    command -v docker >/dev/null 2>&1 \
+        && echo "  [OK] Docker" \
+        || echo "  [--] Docker"
+
+    command -v kubectl >/dev/null 2>&1 \
+        && echo "  [OK] kubectl" \
+        || echo "  [--] kubectl"
+
+    echo
+}
+
+cloud_aws() {
+    echo "=== AWS INFORMATION ==="
+    echo
+
+    if command -v aws >/dev/null 2>&1; then
+        aws --version
+    else
+        echo "AWS CLI is not installed."
+    fi
+
+    echo
+}
+
+cloud_docker() {
+    echo "=== DOCKER INFORMATION ==="
+    echo
+
+    if ! command -v docker >/dev/null 2>&1; then
+        echo "Docker is not installed."
+        return
+    fi
+
+    docker --version
+
+    echo
+
+    if docker info >/dev/null 2>&1; then
+        echo "Docker daemon : Running"
+    else
+        echo "Docker daemon : Not running or unavailable"
+    fi
+
+    echo
+}
+
+cloud_kubernetes() {
+    echo "=== KUBERNETES INFORMATION ==="
+    echo
+
+    if command -v kubectl >/dev/null 2>&1; then
+        kubectl version --client
+    else
+        echo "kubectl is not installed."
+    fi
+
+    echo
+}
+
+cloud_network() {
+    echo "=== CLOUD NETWORK ==="
+    echo
+
+    if ping -c 1 -W 2 8.8.8.8 >/dev/null 2>&1; then
+        echo "Internet : Connected"
+    else
+        echo "Internet : Offline"
+    fi
+
+    if getent hosts amazon.com >/dev/null 2>&1; then
+        echo "DNS      : Working"
+    else
+        echo "DNS      : Failed"
+    fi
+
+    echo
+    echo "Default Route:"
+    ip route | grep '^default' || echo "No default route found"
+
+    echo
+}
+
+cloud_credentials() {
+    echo "=== CLOUD CREDENTIAL STATUS ==="
+    echo
+
+    if [ -d "$HOME/.aws" ]; then
+        echo "AWS configuration directory : Present"
+
+        if [ -f "$HOME/.aws/config" ]; then
+            echo "AWS config                  : Present"
+        else
+            echo "AWS config                  : Not found"
+        fi
+
+        if [ -f "$HOME/.aws/credentials" ]; then
+            echo "AWS credentials file        : Present"
+        else
+            echo "AWS credentials file        : Not found"
+        fi
+    else
+        echo "AWS configuration           : Not configured"
+    fi
+
+    echo
+    echo "Credentials are never displayed by CatalyX."
+    echo
+}
+
+case "$1" in
+
+    ""|status)
+        cloud_status
+        ;;
+
+    tools)
+        cloud_tools
+        ;;
+
+    aws)
+        cloud_aws
+        ;;
+
+    docker)
+        cloud_docker
+        ;;
+
+    kubernetes|k8s)
+        cloud_kubernetes
+        ;;
+
+    network)
+        cloud_network
+        ;;
+
+    credentials)
+        cloud_credentials
+        ;;
+
+    *)
+        echo "Usage:"
+        echo "  cloud"
+        echo "  cloud status"
+        echo "  cloud tools"
+        echo "  cloud aws"
+        echo "  cloud docker"
+        echo "  cloud kubernetes"
+        echo "  cloud network"
+        echo "  cloud credentials"
+        exit 1
+        ;;
+
+esac

@@ -1,0 +1,26 @@
+# Build output
+output/
+*.iso
+*.img
+
+# Virtual machines
+*.vdi
+*.vmdk
+*.vbox
+*.vbox-prev
+
+# Logs
+*.log
+
+# Temporary files
+*.tmp
+*.swp
+
+# Secrets
+.env
+*.pem
+*.key
+
+# OS/editor files
+.DS_Store
+Thumbs.db

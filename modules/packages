@@ -1,0 +1,62 @@
+#!/bin/bash
+
+CONFIG="/etc/distro/config"
+
+if [ -f "$CONFIG" ]; then
+    source "$CONFIG"
+fi
+
+case "$1" in
+
+    info|"")
+        echo "================================"
+        echo "        $OS_NAME PACKAGES"
+        echo "================================"
+        echo
+
+        echo "Package manager:"
+        echo "  APT"
+
+        echo
+        echo "Installed packages:"
+        dpkg-query -f '${binary:Package}\n' | wc -l
+
+        echo
+        echo "Package manager version:"
+        apt --version | head -n 1
+        ;;
+
+    installed)
+        echo "=== INSTALLED PACKAGES ==="
+        dpkg-query -W -f='${binary:Package}\n'
+        ;;
+
+    search)
+        if [ -z "$2" ]; then
+            echo "Usage: $CLI_NAME packages search <name>"
+            exit 1
+        fi
+
+        echo "=== PACKAGE SEARCH ==="
+        apt-cache search "$2"
+        ;;
+
+    show)
+        if [ -z "$2" ]; then
+            echo "Usage: $CLI_NAME packages show <package>"
+            exit 1
+        fi
+
+        apt-cache show "$2"
+        ;;
+
+    updates)
+        echo "=== AVAILABLE UPDATES ==="
+        apt list --upgradable 2>/dev/null
+        ;;
+
+    *)
+        echo "Usage: $CLI_NAME packages [info|installed|search|show|updates]"
+        ;;
+
+esac

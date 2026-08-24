@@ -1,0 +1,211 @@
+#!/bin/bash
+
+CONFIG="/etc/distro/config"
+
+if [ -f "$CONFIG" ]; then
+    source "$CONFIG"
+fi
+
+devops_header() {
+    echo
+    echo "================================"
+    echo "        $OS_NAME DEVOPS"
+    echo "================================"
+    echo
+}
+
+devops_status() {
+    devops_header
+
+    echo "Development:"
+    command -v git >/dev/null 2>&1 \
+        && echo "  [OK] Git" \
+        || echo "  [--] Git"
+
+    command -v python3 >/dev/null 2>&1 \
+        && echo "  [OK] Python" \
+        || echo "  [--] Python"
+
+    echo
+    echo "Containers:"
+    command -v docker >/dev/null 2>&1 \
+        && echo "  [OK] Docker" \
+        || echo "  [--] Docker"
+
+    echo
+    echo "Orchestration:"
+    command -v kubectl >/dev/null 2>&1 \
+        && echo "  [OK] kubectl" \
+        || echo "  [--] kubectl"
+
+    echo
+    echo "Infrastructure as Code:"
+    command -v terraform >/dev/null 2>&1 \
+        && echo "  [OK] Terraform" \
+        || echo "  [--] Terraform"
+
+    echo
+    echo "Compose:"
+    if docker compose version >/dev/null 2>&1; then
+        echo "  [OK] Docker Compose"
+    elif command -v docker-compose >/dev/null 2>&1; then
+        echo "  [OK] docker-compose"
+    else
+        echo "  [--] Docker Compose"
+    fi
+
+    echo
+}
+
+devops_git() {
+    echo "=== GIT ==="
+    echo
+
+    if command -v git >/dev/null 2>&1; then
+        git --version
+    else
+        echo "Git is not installed."
+    fi
+
+    echo
+}
+
+devops_docker() {
+    echo "=== DOCKER ==="
+    echo
+
+    if ! command -v docker >/dev/null 2>&1; then
+        echo "Docker is not installed."
+        return
+    fi
+
+    docker --version
+    echo
+
+    if docker info >/dev/null 2>&1; then
+        echo "Docker daemon : Running"
+    else
+        echo "Docker daemon : Not running or unavailable"
+    fi
+
+    echo
+}
+
+devops_kubernetes() {
+    echo "=== KUBERNETES ==="
+    echo
+
+    if command -v kubectl >/dev/null 2>&1; then
+        kubectl version --client
+    else
+        echo "kubectl is not installed."
+    fi
+
+    echo
+}
+
+devops_terraform() {
+    echo "=== TERRAFORM ==="
+    echo
+
+    if command -v terraform >/dev/null 2>&1; then
+        terraform version
+    else
+        echo "Terraform is not installed."
+    fi
+
+    echo
+}
+
+devops_compose() {
+    echo "=== CONTAINER COMPOSE ==="
+    echo
+
+    if docker compose version >/dev/null 2>&1; then
+        docker compose version
+    elif command -v docker-compose >/dev/null 2>&1; then
+        docker-compose --version
+    else
+        echo "Docker Compose is not installed."
+    fi
+
+    echo
+}
+
+devops_ci() {
+    echo "=== CI/CD CONFIGURATION ==="
+    echo
+
+    FOUND=0
+
+    if [ -d ".github/workflows" ]; then
+        echo "  [FOUND] GitHub Actions"
+        FOUND=1
+    fi
+
+    if [ -f ".gitlab-ci.yml" ]; then
+        echo "  [FOUND] GitLab CI"
+        FOUND=1
+    fi
+
+    if [ -f "Jenkinsfile" ]; then
+        echo "  [FOUND] Jenkins"
+        FOUND=1
+    fi
+
+    if [ -f ".circleci/config.yml" ]; then
+        echo "  [FOUND] CircleCI"
+        FOUND=1
+    fi
+
+    if [ "$FOUND" -eq 0 ]; then
+        echo "  No recognized CI/CD configuration found."
+    fi
+
+    echo
+}
+
+case "$1" in
+
+    ""|status)
+        devops_status
+        ;;
+
+    git)
+        devops_git
+        ;;
+
+    docker)
+        devops_docker
+        ;;
+
+    kubernetes|k8s)
+        devops_kubernetes
+        ;;
+
+    terraform)
+        devops_terraform
+        ;;
+
+    compose)
+        devops_compose
+        ;;
+
+    ci)
+        devops_ci
+        ;;
+
+    *)
+        echo "Usage:"
+        echo "  devops"
+        echo "  devops status"
+        echo "  devops git"
+        echo "  devops docker"
+        echo "  devops kubernetes"
+        echo "  devops terraform"
+        echo "  devops compose"
+        echo "  devops ci"
+        exit 1
+        ;;
+
+esac

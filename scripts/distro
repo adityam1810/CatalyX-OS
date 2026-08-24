@@ -1,0 +1,106 @@
+#!/bin/bash
+
+CONFIG="/etc/distro/config"
+MODULE_DIR="/usr/local/lib/distro/modules"
+
+if [ -f "$CONFIG" ]; then
+    source "$CONFIG"
+else
+    OS_NAME="Linux Distribution"
+    CLI_NAME="distro"
+    VERSION="0.1"
+    CODENAME="Development"
+    BASE="Debian"
+    TYPE="CLI"
+fi
+
+PROGRAM="$(basename "$0")"
+
+if [ "$PROGRAM" = "distro" ] || [ "$PROGRAM" = "catalyx" ]; then
+    COMMAND="$1"
+else
+    COMMAND="$PROGRAM"
+fi
+
+case "$COMMAND" in
+
+    help|"")
+        echo "================================"
+        echo "          $OS_NAME"
+        echo "================================"
+        echo
+        echo "Usage:  <command>"
+        echo
+        echo "Commands:"
+        echo "  help       Show this help"
+        echo "  about      Show OS information"
+        echo "  version    Show OS version"
+        echo "  system     Show system information"
+        echo "  network    Show network information"
+        echo
+        echo "Modules:"
+        
+        for module in "$MODULE_DIR"/*; do
+            if [ -f "$module" ]; then
+                basename "$module"
+            fi
+        done
+
+        echo
+        ;;
+
+    about)
+    echo
+    echo "=========================================="
+    echo "              $OS_NAME"
+    echo "=========================================="
+    echo
+    echo " Version       : $VERSION"
+    echo " Codename      : $CODENAME"
+    echo " Base          : $BASE"
+    echo " Architecture  : $(uname -m)"
+    echo " Kernel        : $(uname -r)"
+    echo " Hostname      : $(hostname)"
+    echo " Uptime        : $(uptime -p)"
+    echo
+    echo " Cloud         : Available"
+    echo " Security      : Available"
+    echo " DevOps        : Available" 
+    echo
+    echo "=========================================="
+    echo
+    ;;
+
+    version)
+        echo "$OS_NAME $VERSION ($CODENAME)"
+        ;;
+
+    system)
+    if [ "$PROGRAM" = "system" ]; then
+        "$MODULE_DIR/system" "$1" "$2" "$3"
+    else
+        "$MODULE_DIR/system" "$2" "$3" "$4"
+    fi
+    ;;
+
+    network)
+        echo "=== NETWORK INFORMATION ==="
+        ip -br addr
+        echo
+        ip route
+        ;;
+
+    *)
+        MODULE="$MODULE_DIR/$COMMAND"
+
+        if [ -f "$MODULE" ] && [ -x "$MODULE" ]; then
+            "$MODULE" "$2" "$3" "$4"
+        else
+            echo "$CLI_NAME: unknown command '$COMMAND'"
+            echo "Run 'help' for available commands."
+            exit 1
+        fi
+        ;;
+
+esac
+

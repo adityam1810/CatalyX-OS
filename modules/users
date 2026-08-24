@@ -1,0 +1,59 @@
+#!/bin/bash
+
+CONFIG="/etc/distro/config"
+
+if [ -f "$CONFIG" ]; then
+    source "$CONFIG"
+fi
+
+case "$1" in
+
+    info|"")
+        echo "================================"
+        echo "          $OS_NAME USERS"
+        echo "================================"
+        echo
+
+        echo "Current user:"
+        whoami
+
+        echo
+        echo "User ID:"
+        id
+
+        echo
+        echo "Groups:"
+        groups
+        ;;
+
+    list)
+        echo "=== USER ACCOUNTS ==="
+        cut -d: -f1 /etc/passwd
+        ;;
+
+    groups)
+        echo "=== GROUPS ==="
+        cut -d: -f1 /etc/group
+        ;;
+
+    sudo)
+        echo "=== SUDO STATUS ==="
+
+        if groups "$USER" 2>/dev/null | grep -qw sudo; then
+            echo "Current user has sudo privileges."
+        else
+            echo "Current user does not have sudo privileges."
+        fi
+        ;;
+
+    who)
+        echo "=== LOGGED-IN USERS ==="
+        who
+        ;;
+
+    *)
+        echo "Usage: $CLI_NAME users [info|list|groups|sudo|who]"
+        ;;
+
+esac
+

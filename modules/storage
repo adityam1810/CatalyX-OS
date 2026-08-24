@@ -1,0 +1,49 @@
+#!/bin/bash
+
+CONFIG="/etc/distro/config"
+
+if [ -f "$CONFIG" ]; then
+    source "$CONFIG"
+fi
+
+case "$1" in
+
+    info|"")
+        echo "================================"
+        echo "        $OS_NAME STORAGE"
+        echo "================================"
+        echo
+
+        echo "Disk usage:"
+        df -h
+
+        echo
+        echo "Block devices:"
+        lsblk
+        ;;
+
+    disks)
+        echo "=== BLOCK DEVICES ==="
+        lsblk
+        ;;
+
+    usage)
+        echo "=== FILESYSTEM USAGE ==="
+        df -h
+        ;;
+
+    mounts)
+        echo "=== MOUNTED FILESYSTEMS ==="
+        findmnt
+        ;;
+
+    memory)
+        echo "=== MEMORY / SWAP ==="
+        free -h
+        ;;
+
+    *)
+        echo "Usage: $CLI_NAME storage [info|disks|usage|mounts|memory]"
+        ;;
+
+esac

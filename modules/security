@@ -1,0 +1,201 @@
+#!/bin/bash
+
+CONFIG="/etc/distro/config"
+
+if [ -f "$CONFIG" ]; then
+    source "$CONFIG"
+fi
+
+security_header() {
+    echo
+    echo "================================"
+    echo "       $OS_NAME SECURITY"
+    echo "================================"
+    echo
+}
+
+security_status() {
+    security_header
+
+    echo "Firewall:"
+    if command -v ufw >/dev/null 2>&1; then
+        sudo ufw status
+    else
+        echo "  UFW : Not installed"
+    fi
+
+    echo
+    echo "SSH:"
+    if systemctl is-active --quiet ssh 2>/dev/null; then
+        echo "  SSH service : Running"
+    else
+        echo "  SSH service : Not running"
+    fi
+
+    echo
+    echo "Listening ports:"
+    ss -tuln
+
+    echo
+    echo "Current user:"
+    whoami
+
+    echo
+}
+
+security_firewall() {
+    echo "=== FIREWALL STATUS ==="
+    echo
+
+    if command -v ufw >/dev/null 2>&1; then
+        sudo ufw status verbose
+    else
+        echo "UFW is not installed."
+    fi
+
+    echo
+}
+
+security_ports() {
+    echo "=== LISTENING PORTS ==="
+    echo
+
+    ss -tuln
+
+    echo
+    echo "Listening services:"
+    ss -tulpn 2>/dev/null || echo "Detailed process information requires elevated privileges."
+    echo
+}
+
+security_users() {
+    echo "=== USER SECURITY ==="
+    echo
+
+    echo "Current user:"
+    whoami
+
+    echo
+    echo "Users with login shells:"
+    awk -F: '$7 !~ /(nologin|false)$/ {print $1 " -> " $7}' /etc/passwd
+
+    echo
+    echo "UID 0 accounts:"
+    awk -F: '$3 == 0 {print $1}' /etc/passwd
+
+    echo
+}
+
+security_ssh() {
+    echo "=== SSH SECURITY ==="
+    echo
+
+    if ! command -v sshd >/dev/null 2>&1; then
+        echo "OpenSSH server is not installed."
+        return
+    fi
+
+    if systemctl is-active --quiet ssh 2>/dev/null; then
+        echo "SSH service : Running"
+    else
+        echo "SSH service : Not running"
+    fi
+
+    echo
+    echo "SSH listening ports:"
+    ss -tln | grep ':22 ' || echo "Port 22 is not listening."
+
+    echo
+    echo "Recent SSH authentication events:"
+    if command -v journalctl >/dev/null 2>&1; then
+        journalctl -u ssh --no-pager -n 10 2>/dev/null
+    else
+        echo "Journal unavailable."
+    fi
+
+    echo
+}
+
+security_processes() {
+    echo "=== SECURITY-RELEVANT PROCESSES ==="
+    echo
+
+    ps aux --sort=-%cpu | head -15
+
+    echo
+}
+
+security_audit() {
+    echo "=== BASIC SECURITY AUDIT ==="
+    echo
+
+    echo "Hostname:"
+    hostname
+
+    echo
+    echo "Kernel:"
+    uname -r
+
+    echo
+    echo "Current user:"
+    whoami
+
+    echo
+    echo "Root login shell:"
+    getent passwd root | cut -d: -f7
+
+    echo
+    echo "World-writable directories in /tmp:"
+    find /tmp -maxdepth 1 -type d -perm -0002 -print 2>/dev/null
+
+    echo
+    echo "SUID files (common security-sensitive files):"
+    find /usr/bin /usr/sbin -type f -perm -4000 -print 2>/dev/null | head -20
+
+    echo
+}
+
+case "$1" in
+
+    ""|status)
+        security_status
+        ;;
+
+    firewall)
+        security_firewall
+        ;;
+
+    ports)
+        security_ports
+        ;;
+
+    users)
+        security_users
+        ;;
+
+    ssh)
+        security_ssh
+        ;;
+
+    processes)
+        security_processes
+        ;;
+
+    audit)
+        security_audit
+        ;;
+
+    *)
+        echo "Usage:"
+        echo "  security"
+        echo "  security status"
+        echo "  security firewall"
+        echo "  security ports"
+        echo "  security users"
+        echo "  security ssh"
+        echo "  security processes"
+        echo "  security audit"
+        exit 1
+        ;;
+
+esac
