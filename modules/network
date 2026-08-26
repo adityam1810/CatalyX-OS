@@ -6,60 +6,134 @@ if [ -f "$CONFIG" ]; then
     source "$CONFIG"
 fi
 
+network_header() {
+    echo
+    echo "================================"
+    echo "        $OS_NAME NETWORK"
+    echo "================================"
+    echo
+}
+
+network_status() {
+    network_header
+
+    echo "Interfaces:"
+    ip -br addr
+
+    echo
+    echo "Default route:"
+    ip route | grep '^default' || echo "No default route"
+
+    echo
+    echo "Connectivity:"
+
+    if ping -c 1 -W 2 8.8.8.8 >/dev/null 2>&1; then
+        echo "  Internet : Connected"
+    else
+        echo "  Internet : Offline"
+    fi
+
+    if getent hosts google.com >/dev/null 2>&1; then
+        echo "  DNS      : Working"
+    else
+        echo "  DNS      : Not working"
+    fi
+
+    echo
+}
+
+network_interfaces() {
+    echo "=== NETWORK INTERFACES ==="
+    echo
+    ip -br addr
+    echo
+}
+
+network_routes() {
+    echo "=== NETWORK ROUTES ==="
+    echo
+    ip route
+    echo
+}
+
+network_dns() {
+    echo "=== DNS CONFIGURATION ==="
+    echo
+
+    if command -v resolvectl >/dev/null 2>&1; then
+        resolvectl status 2>/dev/null
+    elif [ -f /etc/resolv.conf ]; then
+        cat /etc/resolv.conf
+    else
+        echo "DNS configuration not found."
+    fi
+
+    echo
+}
+
+network_connectivity() {
+    echo "=== CONNECTIVITY TEST ==="
+    echo
+
+    if ping -c 1 -W 2 8.8.8.8 >/dev/null 2>&1; then
+        echo "Internet : Connected"
+    else
+        echo "Internet : Offline"
+    fi
+
+    if getent hosts google.com >/dev/null 2>&1; then
+        echo "DNS      : Working"
+    else
+        echo "DNS      : Not working"
+    fi
+
+    echo
+}
+
+network_connections() {
+    echo "=== NETWORK CONNECTIONS ==="
+    echo
+
+    ss -tun
+    echo
+}
+
 case "$1" in
 
-    info|"")
-        echo "================================"
-        echo "        $OS_NAME NETWORK"
-        echo "================================"
-        echo
-
-        echo "Interfaces:"
-        ip -br addr
-
-        echo
-        echo "Routes:"
-        ip route
+    ""|status|info)
+        network_status
         ;;
 
     interfaces)
-        echo "=== NETWORK INTERFACES ==="
-        ip -br addr
+        network_interfaces
         ;;
 
     routes)
-        echo "=== NETWORK ROUTES ==="
-        ip route
+        network_routes
         ;;
 
     dns)
-        echo "=== DNS CONFIGURATION ==="
-
-        if [ -f /etc/resolv.conf ]; then
-            cat /etc/resolv.conf
-        else
-            echo "DNS configuration not found."
-        fi
+        network_dns
         ;;
 
     connectivity)
-        echo "=== CONNECTIVITY TEST ==="
+        network_connectivity
+        ;;
 
-        if ping -c 1 -W 2 8.8.8.8 >/dev/null 2>&1; then
-            echo "Internet : Connected"
-        else
-            echo "Internet : Offline"
-        fi
-
-        if ping -c 1 -W 2 google.com >/dev/null 2>&1; then
-            echo "DNS      : Working"
-        else
-            echo "DNS      : Not working"
-        fi
+    connections)
+        network_connections
         ;;
 
     *)
-        echo "Usage: $CLI_NAME network [info|interfaces|routes|dns|connectivity]"
+        echo "Usage:"
+        echo "  network"
+        echo "  network status"
+        echo "  network interfaces"
+        echo "  network routes"
+        echo "  network dns"
+        echo "  network connectivity"
+        echo "  network connections"
+        exit 1
         ;;
 
 esac

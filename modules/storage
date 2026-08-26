@@ -6,44 +6,96 @@ if [ -f "$CONFIG" ]; then
     source "$CONFIG"
 fi
 
+storage_header() {
+    echo
+    echo "================================"
+    echo "        $OS_NAME STORAGE"
+    echo "================================"
+    echo
+}
+
+storage_status() {
+    storage_header
+
+    echo "Filesystem usage:"
+    df -h
+
+    echo
+    echo "Block devices:"
+    lsblk
+}
+
+storage_disks() {
+    echo "=== BLOCK DEVICES ==="
+    echo
+    lsblk -o NAME,SIZE,TYPE,FSTYPE,MOUNTPOINTS
+    echo
+}
+
+storage_usage() {
+    echo "=== FILESYSTEM USAGE ==="
+    echo
+    df -hT
+    echo
+}
+
+storage_mounts() {
+    echo "=== MOUNTED FILESYSTEMS ==="
+    echo
+    findmnt
+    echo
+}
+
+storage_filesystem() {
+    echo "=== FILESYSTEM INFORMATION ==="
+    echo
+    df -hT
+    echo
+}
+
+storage_memory() {
+    echo "=== MEMORY / SWAP ==="
+    echo
+    free -h
+    echo
+}
+
 case "$1" in
 
-    info|"")
-        echo "================================"
-        echo "        $OS_NAME STORAGE"
-        echo "================================"
-        echo
-
-        echo "Disk usage:"
-        df -h
-
-        echo
-        echo "Block devices:"
-        lsblk
+    ""|status|info)
+        storage_status
         ;;
 
     disks)
-        echo "=== BLOCK DEVICES ==="
-        lsblk
+        storage_disks
         ;;
 
     usage)
-        echo "=== FILESYSTEM USAGE ==="
-        df -h
+        storage_usage
         ;;
 
     mounts)
-        echo "=== MOUNTED FILESYSTEMS ==="
-        findmnt
+        storage_mounts
+        ;;
+
+    filesystem|filesystems)
+        storage_filesystem
         ;;
 
     memory)
-        echo "=== MEMORY / SWAP ==="
-        free -h
+        storage_memory
         ;;
 
     *)
-        echo "Usage: $CLI_NAME storage [info|disks|usage|mounts|memory]"
+        echo "Usage:"
+        echo "  storage"
+        echo "  storage status"
+        echo "  storage disks"
+        echo "  storage usage"
+        echo "  storage mounts"
+        echo "  storage filesystem"
+        echo "  storage memory"
+        exit 1
         ;;
 
 esac

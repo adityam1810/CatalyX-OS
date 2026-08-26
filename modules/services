@@ -6,53 +6,109 @@ if [ -f "$CONFIG" ]; then
     source "$CONFIG"
 fi
 
+services_header() {
+    echo
+    echo "================================"
+    echo "        $OS_NAME SERVICES"
+    echo "================================"
+    echo
+}
+
+services_status() {
+    services_header
+
+    echo "Systemd:"
+    systemctl --version | head -n 1
+
+    echo
+    echo "Failed services:"
+    systemctl --failed --no-pager
+
+    echo
+    echo "Running services:"
+    systemctl list-units --type=service --state=running --no-pager
+}
+
+services_running() {
+    echo "=== RUNNING SERVICES ==="
+    systemctl list-units --type=service --state=running --no-pager
+}
+
+services_failed() {
+    echo "=== FAILED SERVICES ==="
+    systemctl --failed --no-pager
+}
+
+services_enabled() {
+    echo "=== ENABLED SERVICES ==="
+    systemctl list-unit-files --type=service --state=enabled --no-pager
+}
+
+services_list() {
+    echo "=== ALL SERVICES ==="
+    systemctl list-unit-files --type=service --no-pager
+}
+
+services_service_status() {
+    if [ -z "$2" ]; then
+        echo "Usage: services status <service>"
+        exit 1
+    fi
+
+    echo "=== SERVICE STATUS: $2 ==="
+    systemctl status "$2" --no-pager
+}
+
+services_logs() {
+    if [ -z "$2" ]; then
+        echo "Usage: services logs <service>"
+        exit 1
+    fi
+
+    echo "=== SERVICE LOGS: $2 ==="
+    journalctl -u "$2" --no-pager -n 50
+}
+
 case "$1" in
 
-    info|"")
-        echo "================================"
-        echo "        $OS_NAME SERVICES"
-        echo "================================"
-        echo
-
-        echo "Systemd:"
-        systemctl --version | head -n 1
-
-        echo
-        echo "Failed services:"
-        systemctl --failed --no-pager
-
-        echo
-        echo "Running services:"
-        systemctl list-units --type=service --state=running --no-pager
-        ;;
-
-    running)
-        echo "=== RUNNING SERVICES ==="
-        systemctl list-units --type=service --state=running --no-pager
-        ;;
-
-    failed)
-        echo "=== FAILED SERVICES ==="
-        systemctl --failed --no-pager
-        ;;
-
-    enabled)
-        echo "=== ENABLED SERVICES ==="
-        systemctl list-unit-files --type=service --state=enabled --no-pager
+    ""|info)
+        services_status
         ;;
 
     status)
-        if [ -z "$2" ]; then
-            echo "Usage: $CLI_NAME services status <service>"
-            exit 1
-        fi
+        services_service_status "$@"
+        ;;
 
-        echo "=== SERVICE STATUS: $2 ==="
-        systemctl status "$2" --no-pager
+    running)
+        services_running
+        ;;
+
+    failed)
+        services_failed
+        ;;
+
+    enabled)
+        services_enabled
+        ;;
+
+    list)
+        services_list
+        ;;
+
+    logs)
+        services_logs "$@"
         ;;
 
     *)
-        echo "Usage: $CLI_NAME services [info|running|failed|enabled|status]"
+        echo "Usage:"
+        echo "  services"
+        echo "  services status <service>"
+        echo "  services running"
+        echo "  services failed"
+        echo "  services enabled"
+        echo "  services list"
+        echo "  services logs <service>"
+        exit 1
         ;;
 
 esac

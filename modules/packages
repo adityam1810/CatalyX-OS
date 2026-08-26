@@ -6,57 +6,146 @@ if [ -f "$CONFIG" ]; then
     source "$CONFIG"
 fi
 
+modi_header() {
+    echo
+    echo "========================================"
+    echo "             MODI"
+    echo "      Modular Distribution Interface"
+    echo "========================================"
+    echo
+}
+
+modi_info() {
+    modi_header
+
+    echo "Package backend : APT"
+    echo "Database        : DPKG"
+    echo
+    echo "Installed packages:"
+    dpkg-query -f '${binary:Package}\n' | wc -l
+
+    echo
+    echo "APT version:"
+    apt --version | head -n 1
+    echo
+}
+
+modi_list() {
+    echo "=== INSTALLED PACKAGES ==="
+    dpkg-query -W -f='${binary:Package}\n'
+}
+
+modi_search() {
+    if [ -z "$2" ]; then
+        echo "Usage: modi search <package>"
+        exit 1
+    fi
+
+    echo "=== PACKAGE SEARCH ==="
+    apt-cache search "$2"
+}
+
+modi_show() {
+    if [ -z "$2" ]; then
+        echo "Usage: modi show <package>"
+        exit 1
+    fi
+
+    apt-cache show "$2"
+}
+
+modi_install() {
+    if [ -z "$2" ]; then
+        echo "Usage: modi install <package>"
+        exit 1
+    fi
+
+    echo "Installing package: $2"
+    sudo apt install "$2"
+}
+
+modi_remove() {
+    if [ -z "$2" ]; then
+        echo "Usage: modi remove <package>"
+        exit 1
+    fi
+
+    echo "Removing package: $2"
+    sudo apt remove "$2"
+}
+
+modi_update() {
+    echo "=== UPDATING PACKAGE INDEX ==="
+    sudo apt update
+}
+
+modi_upgrade() {
+    echo "=== UPGRADING SYSTEM PACKAGES ==="
+    sudo apt upgrade
+}
+
+modi_clean() {
+    echo "=== CLEANING PACKAGE CACHE ==="
+    sudo apt autoremove
+    sudo apt autoclean
+}
+
 case "$1" in
 
-    info|"")
-        echo "================================"
-        echo "        $OS_NAME PACKAGES"
-        echo "================================"
-        echo
-
-        echo "Package manager:"
-        echo "  APT"
-
-        echo
-        echo "Installed packages:"
-        dpkg-query -f '${binary:Package}\n' | wc -l
-
-        echo
-        echo "Package manager version:"
-        apt --version | head -n 1
+    ""|info)
+        modi_info
         ;;
 
-    installed)
-        echo "=== INSTALLED PACKAGES ==="
-        dpkg-query -W -f='${binary:Package}\n'
+    list|installed)
+        modi_list
         ;;
 
     search)
-        if [ -z "$2" ]; then
-            echo "Usage: $CLI_NAME packages search <name>"
-            exit 1
-        fi
-
-        echo "=== PACKAGE SEARCH ==="
-        apt-cache search "$2"
+        modi_search "$@"
         ;;
 
     show)
-        if [ -z "$2" ]; then
-            echo "Usage: $CLI_NAME packages show <package>"
-            exit 1
-        fi
-
-        apt-cache show "$2"
+        modi_show "$@"
         ;;
 
-    updates)
-        echo "=== AVAILABLE UPDATES ==="
-        apt list --upgradable 2>/dev/null
+    install)
+        modi_install "$@"
+        ;;
+
+    remove)
+        modi_remove "$@"
+        ;;
+
+    update)
+    modi_update
+    ;;
+
+updates)
+    echo "=== AVAILABLE UPDATES ==="
+    apt list --upgradable 2>/dev/null
+    ;;
+
+    upgrade)
+        modi_upgrade
+        ;;
+
+    clean)
+        modi_clean
         ;;
 
     *)
-        echo "Usage: $CLI_NAME packages [info|installed|search|show|updates]"
+        echo "Usage:"
+        echo "  modi"
+        echo "  modi info"
+        echo "  modi list"
+        echo "  modi search <package>"
+        echo "  modi show <package>"
+        echo "  modi install <package>"
+        echo "  modi remove <package>"
+        echo "  modi update"
+        echo "  modi upgrade"
+        echo "  modi clean"
+        exit 1
         ;;
 
 esac

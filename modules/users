@@ -6,54 +6,131 @@ if [ -f "$CONFIG" ]; then
     source "$CONFIG"
 fi
 
+users_header() {
+    echo
+    echo "================================"
+    echo "          $OS_NAME USERS"
+    echo "================================"
+    echo
+}
+
+users_current() {
+    echo "=== CURRENT USER ==="
+    echo
+    echo "Username:"
+    whoami
+
+    echo
+    echo "User ID:"
+    id
+
+    echo
+    echo "Groups:"
+    groups
+
+    echo
+}
+
+users_list() {
+    echo "=== USER ACCOUNTS ==="
+    echo
+
+    awk -F: '$7 !~ /(nologin|false)$/ {print $1 " -> " $7}' /etc/passwd
+
+    echo
+}
+
+users_groups() {
+    echo "=== GROUPS ==="
+    echo
+
+    cut -d: -f1 /etc/group
+
+    echo
+}
+
+users_sudo() {
+    echo "=== SUDO STATUS ==="
+    echo
+
+    CURRENT_USER=$(whoami)
+
+    if groups "$CURRENT_USER" 2>/dev/null | grep -qw sudo; then
+        echo "Current user has sudo privileges."
+    else
+        echo "Current user does not have sudo privileges."
+    fi
+
+    echo
+}
+
+users_sessions() {
+    echo "=== LOGGED-IN USERS ==="
+    echo
+
+    who
+
+    echo
+}
+
+users_home() {
+    echo "=== USER HOME DIRECTORIES ==="
+    echo
+
+    awk -F: '$6 != "" && $6 != "/" {print $1 " -> " $6}' /etc/passwd
+
+    echo
+}
+
+users_status() {
+    users_header
+
+    users_current
+    users_sudo
+    users_sessions
+}
+
 case "$1" in
 
-    info|"")
-        echo "================================"
-        echo "          $OS_NAME USERS"
-        echo "================================"
-        echo
+    ""|info|status)
+        users_status
+        ;;
 
-        echo "Current user:"
-        whoami
-
-        echo
-        echo "User ID:"
-        id
-
-        echo
-        echo "Groups:"
-        groups
+    current)
+        users_current
         ;;
 
     list)
-        echo "=== USER ACCOUNTS ==="
-        cut -d: -f1 /etc/passwd
+        users_list
         ;;
 
     groups)
-        echo "=== GROUPS ==="
-        cut -d: -f1 /etc/group
+        users_groups
         ;;
 
     sudo)
-        echo "=== SUDO STATUS ==="
-
-        if groups "$USER" 2>/dev/null | grep -qw sudo; then
-            echo "Current user has sudo privileges."
-        else
-            echo "Current user does not have sudo privileges."
-        fi
+        users_sudo
         ;;
 
-    who)
-        echo "=== LOGGED-IN USERS ==="
-        who
+    sessions|who)
+        users_sessions
+        ;;
+
+    home)
+        users_home
         ;;
 
     *)
-        echo "Usage: $CLI_NAME users [info|list|groups|sudo|who]"
+        echo "Usage:"
+        echo "  users"
+        echo "  users status"
+        echo "  users current"
+        echo "  users list"
+        echo "  users groups"
+        echo "  users sudo"
+        echo "  users sessions"
+        echo "  users home"
+        exit 1
         ;;
 
 esac
-
