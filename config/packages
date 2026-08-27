@@ -1,0 +1,15 @@
+apt
+bash
+ca-certificates
+dpkg
+hostname
+iproute2
+iputils-ping
+linux-image-amd64
+login
+procps
+sudo
+systemd
+systemd-sysv
+util-linux
+live-boot

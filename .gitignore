@@ -1,4 +1,7 @@
-# Build output
+# Build artifacts
+build/rootfs/
+build/iso/
+build/output/
 output/
 *.iso
 *.img
@@ -20,6 +23,10 @@ output/
 .env
 *.pem
 *.key
+
+# Backup files
+*.bak
+*.backup
 
 # OS/editor files
 .DS_Store
