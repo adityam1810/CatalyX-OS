@@ -65,7 +65,9 @@ MoDI
  ├── APT
  │
  └── DPKG
+ 
 ## Current MoDI capabilities
+
 packages
 packages info
 packages installed
@@ -75,7 +77,7 @@ packages updates
 
 MoDI is designed to evolve into a broader package and distribution management interface for CatalyX.
 
-##🛠️ CatalyX Modules
+🛠️ CatalyX Modules
 
 CatalyX currently contains 9 modular components.
 
@@ -282,6 +284,7 @@ This validates that the generated ISO can operate independently of the developme
 
 ## 📁 Repository Structure
 CatalyX-OS/
+
 │
 ├── modules/
 │   ├── cloud
