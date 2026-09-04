@@ -77,7 +77,7 @@ packages updates
 
 MoDI is designed to evolve into a broader package and distribution management interface for CatalyX.
 
-🛠️ CatalyX Modules
+## 🛠️ CatalyX Modules
 
 CatalyX currently contains 9 modular components.
 
@@ -92,7 +92,7 @@ users	    Users, groups, sudo and login information
 cloud	    Cloud and cloud-native tooling
 devops	  Development and DevOps tooling
 
-##💻 CatalyX CLI
+## 💻 CatalyX CLI
 
 CatalyX provides a unified command-line interface.
 
@@ -109,7 +109,7 @@ catalyx users
 
 The architecture allows additional modules to be added without redesigning the core dispatcher.
 
-##☁️ Cloud & DevOps
+## ☁️ Cloud & DevOps
 
 CatalyX includes dedicated modules for cloud and DevOps workflows.
 
@@ -123,7 +123,7 @@ Python
 
 The Cloud module provides detection and management-oriented information for cloud-native tooling and environments.
 
-##🔐 Security
+## 🔐 Security
 
 CatalyX includes a dedicated security module for system-level inspection.
 
@@ -134,7 +134,7 @@ Listening network ports
 Current user
 Authentication / login information
 
-##🌐 Networking
+## 🌐 Networking
 
 The network module provides:
 
@@ -148,7 +148,7 @@ Example:
 
 catalyx network
 
-##💾 Storage
+## 💾 Storage
 
 The storage module provides information about:
 
@@ -161,7 +161,7 @@ Swap
 Example:
 
 catalyx storage
-##⚙️ Services
+## ⚙️ Services
 
 CatalyX integrates with systemd for service inspection.
 
@@ -173,7 +173,7 @@ catalyx services failed
 catalyx services enabled
 catalyx services status ssh
 
-##👥 Users
+## 👥 Users
 
 The users module provides:
 
@@ -185,7 +185,7 @@ catalyx users who
 
 The implementation intentionally avoids conflicting with Debian's existing /usr/bin/users command.
 
-##🐧 Base System
+##  🐧 Base System
 
 CatalyX OS v0.1 is built on:
 
@@ -199,7 +199,7 @@ Package system	APT / DPKG
 Bootloader	GRUB
 Live environment	live-boot
 
-##🔨 Reproducible ISO Build
+##  🔨 Reproducible ISO Build
 
 CatalyX includes a build pipeline for generating the bootable ISO from a clean Debian root filesystem.
 
@@ -232,13 +232,13 @@ Linux Kernel + Live Boot
       ▼
 CatalyX OS ISO
 
-Build requirements
+---Build requirements
 debootstrap
 xorriso
 grub-mkrescue
 mksquashfs
 
-Build
+--- Build
 git clone https://github.com/adityam1810/CatalyX-OS.git
 cd CatalyX-OS
 sudo ./build.sh
@@ -261,7 +261,7 @@ CatalyX-OS-0.1-MODI.iso
 
 The official ISO is available through the project's GitHub Releases.
 
-##🧪 Validation
+## 🧪 Validation
 
 CatalyX v0.1 was tested outside the original development environment using a fresh VirtualBox VM.
 
@@ -308,7 +308,7 @@ CatalyX-OS/
 ├── .gitignore
 └── README.md
 
-##🎯 Project Goals
+## 🎯 Project Goals
 Modular Linux architecture
 CLI-first system administration
 Simple package management through MoDI
@@ -319,7 +319,7 @@ Debian compatibility
 Independent bootable releases
 Extensible system modules
 
-##🗺️ Roadmap
+## 🗺️ Roadmap
 v0.1 — MODI
  Debian-based foundation
  CatalyX CLI
@@ -338,7 +338,7 @@ v0.1 — MODI
  Fresh VM validation
  GitHub Release
  
-##Future
+## Future
  Installable ISO
  Expanded MoDI package operations
  More cloud integrations
@@ -347,7 +347,7 @@ v0.1 — MODI
  Automated ISO testing
  Release automation
  
-##📜 Release Information
+## 📜 Release Information
 
 Project: CatalyX OS
 Version: 0.1
